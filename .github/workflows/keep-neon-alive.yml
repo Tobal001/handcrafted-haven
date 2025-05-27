@@ -1,0 +1,20 @@
+
+# .github/workflows/keep-neon-alive.yml
+
+name: Keep Neon Alive
+on:
+  schedule:
+    # Runs every 5 minutes (GitHub's shortest interval)
+    - cron: '*/4 * * * *'
+  workflow_dispatch: # Allow manual triggers
+
+jobs:
+  ping-neon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Neon DB
+        run: |
+          curl -X GET "https://your-vercel-app.vercel.app/api/keep-alive"
+        env:
+          # Optional: Secure your endpoint (recommended)
+          AUTH_TOKEN: ${{ secrets.VERCEL_AUTH_TOKEN }}
