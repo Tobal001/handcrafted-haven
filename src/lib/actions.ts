@@ -235,9 +235,9 @@ export async function register(
         message: 'This email is already registered.',
         success: false
       };
-    }
+    } else {
 
-    // Hash password and create user
+         // Hash password and create user
     const hashedPassword = await bcrypt.hash(password, 10);
     await createUser({
       name,
@@ -249,6 +249,7 @@ export async function register(
       reset_token: null,
       reset_token_expires: null
     });
+    }
 
     return { 
       success: true,
