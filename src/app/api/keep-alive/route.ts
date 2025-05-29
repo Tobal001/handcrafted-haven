@@ -25,6 +25,3 @@ export async function GET() {
 
 
 // http://localhost:3000/api/keep-alive
-
-// Key: POSTGRES_URL
-// Value: Your_Neon_DB_Connection_String (from Neon dashboard)
