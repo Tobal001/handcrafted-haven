@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "npm list @prisma/client || true"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
-    "@prisma/client": "^6.8.2",
+    "@prisma/client": "^6.9.0",
     "@vercel/postgres": "^0.10.0",
     "bcryptjs": "^3.0.2",
     "clsx": "^2.1.1",
@@ -34,6 +35,7 @@
     "eslint-config-next": "15.3.2",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "prisma": "^6.9.0"
   }
 }
