@@ -1,4 +1,5 @@
 
+
 // src/lib/data/artisans.ts:
 
 'use server';
@@ -7,6 +8,9 @@ import { fetchProfileByUserId } from './profile';
 import { unstable_noStore as noStore } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { ArtisanProfile, ArtisanProfileFormData } from '@/lib/definitions';
+// Import base model types directly from @prisma/client
+import { ArtisanProfile as PrismaArtisanProfileModel, User as PrismaUserModel } from '@prisma/client';
+
 
 // Helper function to safely get string values from FormData
 function getStringValue(formData: FormData, key: string): string | null {
@@ -116,9 +120,6 @@ export async function deleteArtisanProfile(userId: string) {
 }
 
 
-
-
-
 // Add this function to your existing artisans data file
 export async function fetchAllArtisanProfiles(): Promise<ArtisanProfile[]> {
   try {
@@ -133,18 +134,33 @@ export async function fetchAllArtisanProfiles(): Promise<ArtisanProfile[]> {
       },
     });
 
-    return artisans.map((artisan) => ({
+    // Define the type for the 'artisan' parameter manually.
+    // This type represents the Prisma ArtisanProfile model combined with the included User fields.
+    type ArtisanWithUserFields = PrismaArtisanProfileModel & {
+      user: {
+        name: string | null; // Based on your select, name can be null from database
+        email: string | null; // Based on your select, email can be null from database
+      };
+    };
+
+    // Map and explicitly type the 'artisan' parameter
+    return artisans.map((artisan: ArtisanWithUserFields) => ({
+      // Spread all properties from the Prisma ArtisanProfile model (including original user object)
       ...artisan,
+      // Flatten the name and email from the user object to top-level properties
       name: artisan.user.name || '',
       email: artisan.user.email || '',
+      // IMPORTANT: If ArtisanProfile from lib/definitions.ts does NOT have 'user',
+      // 'name', or 'email' as top-level properties, you might get a new type error
+      // on the function's return line `return artisans.map(...)`.
+      // If that happens, you'll need to adjust ArtisanProfile in lib/definitions.ts
+      // or define a new return type for this function.
     }));
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch artisan profiles.');
   }
 }
-
-
 
 
 // NEW FUNCTION: Optimized for the artisan list page with images
