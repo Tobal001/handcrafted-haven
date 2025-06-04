@@ -1,6 +1,7 @@
 
 
 // src/components/layout/ClientHeader.tsx
+
 'use client';
 
 import { useState } from 'react';
