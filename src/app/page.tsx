@@ -1,4 +1,12 @@
+
+// src/app/page.tsx
+
+'use client'; // Add this line if you use client-side hooks like useRouter
+import { useRouter } from 'next/navigation'; // Import useRouter
+
 export default function Home() {
+  const router = useRouter(); // Initialize useRouter
+
   return (
     <main className="bg-[#F9F4EF] text-[#3E3E3E] font-sans">
       {/* Hero Section */}
@@ -7,14 +15,20 @@ export default function Home() {
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6 leading-tight">
             Discover Unique <br /> Handcrafted Creations
           </h1>
+
           <div className="flex flex-col sm:flex-row gap-4">
             <button className="bg-[#B55B3D] text-white px-6 py-3 rounded font-semibold hover:bg-[#9E4F37]">
               Explore Products
             </button>
-            <button className="border-2 border-[#3E3E3E] px-6 py-3 rounded font-semibold hover:bg-[#F0ECE8]">
+
+            <button 
+              className="border-2 border-[#3E3E3E] px-6 py-3 rounded font-semibold hover:bg-[#F0ECE8]"
+              onClick={() => router.push('/artisans/list')}
+            >
               Meet Artisans
             </button>
           </div>
+
         </div>
         <div>
           <div className="w-full h-64 bg-[#E6E1DC] rounded-xl shadow" />

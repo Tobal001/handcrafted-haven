@@ -1,0 +1,225 @@
+
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+}
+
+enum UserRole {
+  buyer
+  artisan
+  admin
+}
+
+model User {
+  id                  String               @id @default(uuid()) @map("id") @db.Uuid
+  name                String?              @db.VarChar(255)
+  email               String               @unique @db.VarChar(255)
+  password            String?              @db.VarChar(255)
+  role                UserRole             @default(buyer)
+  emailVerified       DateTime?            @map("email_verified")
+  verificationToken   String?              @map("verification_token") @db.VarChar(255)
+  resetToken          String?              @map("reset_token") @db.VarChar(255)
+  resetTokenExpires   DateTime?            @map("reset_token_expires") @db.Timestamptz()
+  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt           DateTime             @updatedAt @map("updated_at") @db.Timestamptz()
+
+  artisanProfile      ArtisanProfile?
+  passwordHistory     PasswordHistory[]
+  passwordResetTokens PasswordResetToken[]
+  sessions            Session[]
+  accounts            Account[]
+  profile             Profile?
+  reviews             Review[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// prisma/schema.prisma
+
+model ArtisanProfile {
+  id                String    @id @default(uuid()) @map("seller_profile_id") @db.Uuid // Assumes 'seller_profile_id' is PK of 'artisan_profiles'
+  userId            String    @unique @map("user_id") @db.Uuid
+  bio               String?   @db.Text
+  location          String?   @db.VarChar(100)
+  website           String?   @db.VarChar(255)
+  shopName          String    @map("shop_name") @db.VarChar(255)
+  shopDescription   String?   @map("shop_description") @db.Text
+  averageRating     Float     @default(0.0) @map("average_rating")
+  totalSales        Int       @default(0) @map("total_sales")
+  isTopArtisan      Boolean   @default(false) @map("is_top_artisan")
+  policies          String?   @db.Text
+  shippingInfo      String?   @map("shipping_info") @db.Text
+  returnPolicy      String?   @map("return_policy") @db.Text
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products          Product[]
+
+  @@map("artisan_profiles")
+}
+
+model PasswordHistory {
+  id           String   @id @default(uuid()) @map("id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  changedAt    DateTime @default(now()) @map("changed_at") @db.Timestamptz()
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_history")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid()) @map("id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  token     String   @unique @db.VarChar(255)
+  expires   DateTime @db.Timestamptz()
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("sessions")
+}
+
+model Account {
+  id                String   @id @default(uuid()) @map("id") @db.Uuid
+  userId            String   @map("user_id") @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String   @map("provider_account_id")
+  refresh_token     String?  @db.Text
+  access_token      String?  @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.Text
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Profile {
+  profileId       String    @id @default(uuid()) @map("profile_id") @db.Uuid
+  userId          String    @unique @map("user_id") @db.Uuid
+  bio             String?   @db.Text
+  profileImageUrl String?   @map("profile_image_url") @db.VarChar(255)
+  address         String?   @db.VarChar(255)
+  city            String?   @db.VarChar(255)
+  state           String?   @db.VarChar(255)
+  zipCode         String?   @map("zip_code") @db.VarChar(50)
+  country         String?   @db.VarChar(100)
+  phoneNumber     String?   @map("phone_number") @db.VarChar(50)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Category {
+  categoryId       String     @id @default(uuid()) @map("category_id") @db.Uuid
+  name             String     @unique @db.VarChar(255)
+  description      String?    @db.Text
+  parentCategoryId String?    @map("parent_category_id") @db.Uuid
+  createdAt        DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt        DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
+
+  parent           Category?  @relation("Subcategories", fields: [parentCategoryId], references: [categoryId], onDelete: SetNull)
+  subcategories    Category[] @relation("Subcategories")
+  products         Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  productId           String         @id @default(uuid()) @map("product_id") @db.Uuid
+  sellerId            String         @map("seller_id") @db.Uuid // Mapped to 'seller_id' in DB, which references 'artisan_profiles.user_id'
+  categoryId          String?        @map("category_id") @db.Uuid
+  name                String         @db.VarChar(255)
+  description         String         @db.Text
+  price               Decimal        @db.Decimal(10, 2)
+  quantityAvailable   Int            @map("quantity_available")
+  isFeatured          Boolean        @default(false) @map("is_featured")
+  isActive            Boolean        @default(true) @map("is_active")
+  creationDate        DateTime       @default(now()) @map("creation_date") @db.Timestamptz()
+  lastUpdated         DateTime       @updatedAt @map("last_updated") @db.Timestamptz()
+  materialsUsed       String?        @map("materials_used") @db.Text
+  dimensions          String?        @db.VarChar(100)
+  weight              Decimal?       @db.Decimal(10, 2)
+  careInstructions    String?        @map("care_instructions") @db.Text
+  tags                Json?          @db.JsonB
+  searchVector        String?        @map("search_vector") @db.Text
+
+  seller              ArtisanProfile @relation(fields: [sellerId], references: [userId], onDelete: Cascade) // Correctly links via userId
+  category            Category?      @relation(fields: [categoryId], references: [categoryId], onDelete: SetNull)
+  images              ProductImage[]
+  reviews             Review[]
+
+  @@map("products")
+}
+
+model ProductImage {
+  imageId     String   @id @default(uuid()) @map("image_id") @db.Uuid
+  productId   String   @map("product_id") @db.Uuid
+  imageUrl    String   @map("image_url") @db.VarChar(255)
+  isPrimary   Boolean  @default(false) @map("is_primary")
+  altText     String?  @map("alt_text") @db.VarChar(255)
+  displayOrder Int     @default(0) @map("display_order")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  product     Product  @relation(fields: [productId], references: [productId], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+
+model Review {
+  reviewId       String    @id @default(uuid()) @map("review_id") @db.Uuid
+  productId      String    @map("product_id") @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  rating         Int       @map("rating")
+  title          String    @map("title") @db.VarChar(255)
+  comment        String    @map("comment") @db.Text
+  reviewDate     DateTime  @default(now()) @map("review_date") @db.Timestamptz()
+  isApproved     Boolean   @default(false) @map("is_approved")
+  helpfulCount   Int       @default(0) @map("helpful_count")
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+
+  product        Product   @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
+}
