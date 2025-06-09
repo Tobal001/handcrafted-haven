@@ -22,7 +22,7 @@ export default function ClientHeader() {
           <nav className="space-x-4 text-sm font-medium mr-6">
             <Link href="/" className="hover:underline">Home</Link>
             <Link href="/products" className="hover:underline">Shop</Link>
-            <Link href="/artisans" className="hover:underline">Artisans</Link>
+            <Link href="/meet-artisans" className="hover:underline">Artisans</Link>
             <Link href="/about" className="hover:underline">About</Link>
           </nav>
           <div className="ml-6">

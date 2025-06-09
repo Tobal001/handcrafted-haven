@@ -183,6 +183,9 @@ model Product {
   tags                Json?          @db.JsonB
   searchVector        String?        @map("search_vector") @db.Text
 
+  averageRating       Float            @default(0.0) @map("average_rating")
+  reviewCount         Int              @default(0)    @map("review_count")
+
   seller              ArtisanProfile @relation(fields: [sellerId], references: [userId], onDelete: Cascade) // Correctly links via userId
   category            Category?      @relation(fields: [categoryId], references: [categoryId], onDelete: SetNull)
   images              ProductImage[]
