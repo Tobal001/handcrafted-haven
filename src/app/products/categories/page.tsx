@@ -1,4 +1,6 @@
+
 // app/dashboard/categories/page.tsx
+
 'use client'; // This is a client component
 
 import React, { useState, useEffect } from 'react';

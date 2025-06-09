@@ -37,7 +37,12 @@ const roleBasedProtectedRoutes: ProtectedRouteConfig[] = [
     redirectPath: '/dashboard?message=Access%20Denied%20to%20Product%20Management',
   },
   {
-    path: '/artisan', // Example: Artisan/Admin can manage products
+    path: '/artisan', // Example: Artisan can manage profile
+    allowedRoles: ['artisan'],
+    redirectPath: '/dashboard?message=Access%20Denied%20to%20Product%20Management',
+  },
+   {
+    path: '/products/create', // Example: Artisan can manage products
     allowedRoles: ['artisan'],
     redirectPath: '/dashboard?message=Access%20Denied%20to%20Product%20Management',
   },
