@@ -4,7 +4,8 @@
 import { z } from 'zod';
 export type UserRole = 'buyer' | 'artisan' | 'admin';
 
-// Corrected User type to match Prisma's camelCase naming and returned types
+
+// USER DEFINATIONS
 export type User = {
   id: string;
   name: string | null; // Corrected: name can be string or null
@@ -19,7 +20,7 @@ export type User = {
   updatedAt: Date;
 };
 
-// UserInput remains the same as it defines the structure of data provided for creation
+
 export type UserInput = {
   name: string;
   email: string;
@@ -42,8 +43,6 @@ export interface SessionUser {
 
 
 // --- PROFILE DEFINITIONS ---
-
-// UPDATED: Changed to camelCase to match Prisma model
 export interface Profile {
   profileId: string; 
   userId: string;    
@@ -140,12 +139,7 @@ export type CategoryFormValidationErrors = {
 
 
 
-
-
 // ARTISANS DEFINATIONS
-
-// Add to existing definitions
-
 export interface ArtisanProfile {
   id: string;
   userId: string;
@@ -191,3 +185,127 @@ export type ArtisanProfileFormValidationErrors = {
   shippingInfo?: string[];
   returnPolicy?: string[];
 };
+
+
+
+// PRODUCTS DEFINATIONS
+export interface Product {
+  productId: string;
+  sellerId: string;
+  categoryId: string | null;
+  name: string;
+  description: string;
+  price: number;
+  quantityAvailable: number;
+  isFeatured: boolean;
+  isActive: boolean;
+  creationDate: Date; // Note: This will be converted to string (ISO 8601) by transformProduct
+  lastUpdated: Date;  // Note: This will be converted to string (ISO 8601) by transformProduct
+  materialsUsed: string | null;
+  dimensions: string | null;
+  weight: number | null;
+  careInstructions: string | null;
+  tags: any | null; // Consider making this 'string[] | null' if it's an array of strings
+  searchVector: string | null;
+  averageRating: number; // Add this line
+  reviewCount: number;   // Add this line
+  images: ProductImage[];
+  reviews: Review[];
+  seller?: {
+    shopName: string;
+    userId: string;
+    user?: {
+      name: string | null;
+    };
+  };
+}
+
+
+// PRODUCTS-IMAGE DEFINATIONS
+export interface ProductImage {
+  imageId: string;
+  productId: string;
+  imageUrl: string;
+  isPrimary: boolean;
+  altText: string | null;
+  displayOrder: number;
+  createdAt: Date;
+}
+
+
+// REVIEWS DEFINATIONS
+export interface Review {
+  reviewId: string;
+  productId: string;
+  userId: string;
+  rating: number;
+  title: string;
+  comment: string;
+  reviewDate: Date;
+  isApproved: boolean;
+  helpfulCount: number;
+  updatedAt: Date;
+  user?: {
+    name: string | null;
+  };
+}
+
+
+export type ProductFormData = {
+  name: string;
+  description: string;
+  price: number;
+  quantityAvailable: number;
+  categoryId?: string | null;
+  materialsUsed?: string | null;
+  dimensions?: string | null;
+  weight?: number | null;
+  careInstructions?: string | null;
+  tags?: string | null;
+  imageUrl?: string | null;
+  isFeatured?: boolean; 
+  isActive?: boolean;   
+};
+
+
+export const ProductFormSchema = z.object({
+  name: z.string().min(1, 'Product name is required').max(255),
+  description: z.string().min(1, 'Description is required').max(2000),
+  price: z.number().min(0.01, 'Price must be at least $0.01'),
+  quantityAvailable: z.number().min(1, 'Quantity must be at least 1'),
+  categoryId: z.string().uuid().optional().nullable(),
+  materialsUsed: z.string().max(500).optional().nullable(),
+  dimensions: z.string().max(100).optional().nullable(),
+  weight: z.number().min(0).optional().nullable(),
+  careInstructions: z.string().max(500).optional().nullable(),
+  tags: z.string().optional().nullable(),
+  imageUrl: z.string().url('Must be a valid URL').optional().nullable(),
+  // You might also need to add these to your Zod schema if you're validating them here
+  isFeatured: z.boolean().optional(),
+  isActive: z.boolean().optional(),
+});
+
+
+
+
+
+export interface ArtisanProfileForDisplay {
+  userId: string;
+  shopName: string;
+  bio: string | null;
+  location: string | null;
+  policies: string | null;
+  returnPolicy: string | null;
+  shippingInfo: string | null;
+  shopDescription: string | null;
+  website: string | null;
+  isTopArtisan: boolean;
+  totalSales: number;
+  createdAt: Date;
+  updatedAt: Date;
+  // These fields are merged from the associated User model for display
+  userName: string | null;
+  userEmail: string | null;
+  profileImageUrl: string | null;
+  phoneNumber: string | null; // Make sure this is also included from the User's Profile
+}
