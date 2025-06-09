@@ -77,7 +77,7 @@ export default function WelcomeMessage({ name, email, role, profileImageUrl }: W
                     Artisan Profile
                   </Button>
                 </Link>
-                <Link href="/products/manage" passHref>
+                <Link href="/artisans/products" passHref>
                   <Button className="bg-[#B55B3D] hover:bg-[#9E4F37] text-white whitespace-nowrap">
                     Manage Products
                   </Button>
