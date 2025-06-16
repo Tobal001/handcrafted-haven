@@ -1,85 +1,44 @@
-
-// src/middleware.ts
-
-import { auth } from './auth'; // Import your auth function
+import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { UserRole } from './lib/definitions'; // Import UserRole type
+import { UserRole } from './lib/definitions';
 
-// Define an interface for paths and the roles allowed to access them
 interface ProtectedRouteConfig {
   path: string;
   allowedRoles: UserRole[];
-  redirectPath?: string; // Optional: specify a custom redirect if access is denied
+  redirectPath?: string;
 }
 
-// --- START: ROLE-BASED PROTECTED ROUTES CONFIGURATION ---
-// These routes require a specific role AFTER the user has already been authenticated
 const roleBasedProtectedRoutes: ProtectedRouteConfig[] = [
-  {
-    path: '/dashboard/categories',
-    allowedRoles: ['artisan', 'admin'],
-    redirectPath: '/dashboard?message=Access%20Denied%20to%20Categories',
-  },
-  {
-    path: '/products/categories', // <--- This will now only enforce role for logged-in users
-    allowedRoles: ['artisan', 'admin'],
-    redirectPath: '/dashboard?message=Access%20Denied%20to%20Product%20Categories',
-  },
-  {
-    path: '/admin', // Example: Protect all admin routes
-    allowedRoles: ['admin'],
-    redirectPath: '/dashboard?message=Administrator%20Access%20Required',
-  },
-  {
-    path: '/products/manage', // Example: Artisan/Admin can manage products
-    allowedRoles: ['artisan', 'admin'],
-    redirectPath: '/dashboard?message=Access%20Denied%20to%20Product%20Management',
-  },
-  {
-    path: '/artisan', // Example: Artisan can manage profile
-    allowedRoles: ['artisan'],
-    redirectPath: '/dashboard?message=Access%20Denied%20to%20Product%20Management',
-  },
-   {
-    path: '/products/create', // Example: Artisan can manage products
-    allowedRoles: ['artisan'],
-    redirectPath: '/dashboard?message=Access%20Denied%20to%20Product%20Management',
-  },
-  // Add other role-specific protected routes as needed
+  { path: '/dashboard/categories', allowedRoles: ['artisan', 'admin'], redirectPath: '/dashboard?message=Access%20Denied%20to%20Categories' },
+  { path: '/products/categories', allowedRoles: ['artisan', 'admin'], redirectPath: '/dashboard?message=Access%20Denied%20to%20Product%20Categories' },
+  { path: '/admin', allowedRoles: ['admin'], redirectPath: '/dashboard?message=Administrator%20Access%20Required' },
+  { path: '/products/manage', allowedRoles: ['artisan', 'admin'], redirectPath: '/dashboard?message=Access%20Denied%20to%20Product%20Management' },
+  { path: '/artisan', allowedRoles: ['artisan'], redirectPath: '/dashboard?message=Access%20Denied%20to%20Product%20Management' },
+  { path: '/products/create', allowedRoles: ['artisan'], redirectPath: '/dashboard?message=Access%20Denied%20to%20Product%20Management' },
 ];
-// --- END: ROLE-BASED PROTECTED ROUTES CONFIGURATION ---
 
+export async function middleware(req: NextRequest) {
+  const token = await getToken({ req });
+  const { pathname } = req.nextUrl;
 
-export default auth((req: NextRequest) => { // Type req as NextRequest
-  const { nextUrl } = req;
-  const userRole: UserRole | undefined = req.auth?.user?.role; // Safely get user role from auth object
-
-  // This middleware is only executed if the `authorized` callback in `auth.config.ts` returned `true`.
-  // Therefore, `req.auth` should always be present here for paths requiring general authentication.
-
-  // 1. Handle role-based access for specific routes (authorization)
-  // Find if the current pathname matches any specifically role-protected routes
-  const matchedRoleProtectedRoute = roleBasedProtectedRoutes.find(route =>
-    nextUrl.pathname.startsWith(route.path)
+  const matchedRoute = roleBasedProtectedRoutes.find((route) =>
+    pathname.startsWith(route.path)
   );
 
-  if (matchedRoleProtectedRoute) {
-    // If a user is logged in (which they must be to reach here) but their role is not allowed
-    // for this specific route, redirect them.
-    if (!userRole || !matchedRoleProtectedRoute.allowedRoles.includes(userRole)) {
-      const redirectUrl = new URL(matchedRoleProtectedRoute.redirectPath || '/dashboard?message=Access%20Denied%20by%20Role', nextUrl);
-      return NextResponse.redirect(redirectUrl);
+  if (matchedRoute) {
+    const userRole = token?.role as UserRole | undefined;
+
+    if (!userRole || !matchedRoute.allowedRoles.includes(userRole)) {
+      return NextResponse.redirect(
+        new URL(matchedRoute.redirectPath || '/dashboard?message=Access%20Denied', req.url)
+      );
     }
   }
 
-  // If no role-based restriction applies or if user is authorized, allow the request to proceed
   return NextResponse.next();
-});
+}
 
-// Configure the matcher to apply middleware to relevant paths
 export const config = {
-  // This matcher should be broad, ensuring the middleware runs on all relevant pages.
-  // The primary authentication check is in auth.config.ts.
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.gif$|.*\\.webp$).*)'],
+  matcher: ['/((?!api|_next|favicon.ico).*)'],
 };

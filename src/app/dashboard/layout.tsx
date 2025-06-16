@@ -1,16 +1,19 @@
+// app/dashboard/layout.tsx
+import  getServerSession  from 'next-auth';
+import { authOptions } from '@/auth';
+import { redirect } from 'next/navigation';
 
-// Update src/app/dashboard/layout.tsx
+export default async function Layout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(authOptions);
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+  if (!session) {
+    redirect('/login');
+  }
+
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="flex-grow p-6">
-        {children}
-      </div>
+    <div>
+      {/* You can pass session down if needed */}
+      {children}
     </div>
   );
 }

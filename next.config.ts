@@ -34,58 +34,48 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'i.postimg.cc', // ADDED: For images from Postimages
+        hostname: 'i.postimg.cc',
         port: '',
         pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'i.imgur.com', // For direct image links from Imgur
+        hostname: 'i.imgur.com',
         port: '',
         pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'i.ibb.co', // For direct image links from ImgBB
+        hostname: 'i.ibb.co',
         port: '',
         pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'imgbox.com', // For direct image links from Imgbox
+        hostname: 'imgbox.com',
         port: '',
         pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'res.cloudinary.com', // For images hosted on Cloudinary
+        hostname: 'res.cloudinary.com',
         port: '',
         pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'ik.imagekit.io', // For images hosted on ImageKit.io
+        hostname: 'ik.imagekit.io',
         port: '',
         pathname: '/**',
       },
-      // You can add more here if you use other specific CDNs or image hosts
-      // For example, if you use a custom domain for Imgix:
-      // {
-      //   protocol: 'https',
-      //   hostname: 'your-custom-domain.imgix.net',
-      //   port: '',
-      //   pathname: '/**',
-      // },
-      // Or for AWS CloudFront (replace with your distribution ID):
-      // {
-      //   protocol: 'https',
-      //   hostname: '*.cloudfront.net', // Use a wildcard for subdomains if applicable
-      //   port: '',
-      //   pathname: '/**',
-      // },
+      {
+        protocol: 'https',
+        hostname: 'images.pexels.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
-  // Other Next.js configurations can go here
 };
 
 module.exports = nextConfig;

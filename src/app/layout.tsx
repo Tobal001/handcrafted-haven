@@ -26,7 +26,7 @@ export default function RootLayout({
       <body className="bg-[#F9F4EF] text-[#3E3E3E] antialiased font-sans flex flex-col min-h-screen">
         <Providers>
           <ClientHeader />
-          <main className="flex-grow max-w-7xl mx-auto px-6 pt-4">
+          <main className="flex-grow max-w-7xl mx-auto pt-4">
             {children}
           </main>
           {/* Use the new ClientFooter component */}

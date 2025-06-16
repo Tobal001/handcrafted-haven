@@ -1,56 +1,83 @@
-
-// src/components/profile/ProfileForm.tsx
-
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '../ui/button';
-import { UserCircleIcon, HomeIcon, MapPinIcon, PhoneIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
-import { Profile, ProfileFormSchema, ProfileFormValidationErrors } from '@/lib/definitions'; // Import types and schema
-import { ZodError } from 'zod'; // Import ZodError
-import { PhotoIcon } from '@heroicons/react/20/solid'; // NEW: Import PhotoIcon
+import {
+  UserCircleIcon,
+  HomeIcon,
+  PhoneIcon,
+  GlobeAltIcon,
+} from '@heroicons/react/24/outline';
+import { PhotoIcon } from '@heroicons/react/20/solid';
+import {
+  ProfileFormSchema,
+  type Profile,
+  type ProfileFormValidationErrors,
+} from '@/lib/definitions';
+import { ZodError } from 'zod';
+
+interface ProfileFormProps {
+  profile?: Profile;
+  onSubmit: (formData: FormData) => void;
+  isEditing?: boolean;
+}
 
 export default function ProfileForm({
   profile,
   onSubmit,
   isEditing = false,
-}: {
-  profile?: Profile; // Use the imported Profile type
-  onSubmit: (formData: FormData) => void;
-  isEditing?: boolean;
-}) {
-  const [bio, setBio] = useState(profile?.bio || '');
-  const [address, setAddress] = useState(profile?.address || '');
-  const [city, setCity] = useState(profile?.city || '');
-  const [state, setState] = useState(profile?.state || '');
-  const [zipCode, setZipCode] = useState(profile?.zipCode || '');
-  const [country, setCountry] = useState(profile?.country || '');
-  const [phoneNumber, setPhoneNumber] = useState(profile?.phoneNumber || '');
-  const [profileImageUrl, setProfileImageUrl] = useState(profile?.profileImageUrl || ''); // NEW: State for profile image URL
+}: ProfileFormProps) {
+  const [formState, setFormState] = useState({
+    bio: '',
+    profileImageUrl: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: '',
+    phoneNumber: '',
+  });
 
   const [errors, setErrors] = useState<ProfileFormValidationErrors>({});
+  const [statusMessage, setStatusMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     if (profile) {
-      setBio(profile.bio || '');
-      setAddress(profile.address || '');
-      setCity(profile.city || '');
-      setState(profile.state || '');
-      setZipCode(profile.zipCode || '');
-      setCountry(profile.country || '');
-      setPhoneNumber(profile.phoneNumber || '');
-      setProfileImageUrl(profile.profileImageUrl || ''); // NEW: Set profile image URL
+      setFormState({
+        bio: profile.bio || '',
+        profileImageUrl: profile.profileImageUrl || '',
+        address: profile.address || '',
+        city: profile.city || '',
+        state: profile.state || '',
+        zipCode: profile.zipCode || '',
+        country: profile.country || '',
+        phoneNumber: profile.phoneNumber || '',
+      });
     }
   }, [profile]);
 
-  // Handle form submission with validation
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // Prevent default form submission
+  useEffect(() => {
+    if (statusMessage) {
+      const timer = setTimeout(() => setStatusMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [statusMessage]);
 
-    const formData = new FormData(event.currentTarget);
-    const data = {
+  const handleChange = (
+    field: keyof typeof formState
+  ) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormState((prev) => ({ ...prev, [field]: e.target.value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    const plainData = {
       bio: formData.get('bio'),
-      profileImageUrl: formData.get('profileImageUrl'), // NEW: Include profileImageUrl in data for Zod
+      profileImageUrl: formData.get('profileImageUrl'),
       address: formData.get('address'),
       city: formData.get('city'),
       state: formData.get('state'),
@@ -60,194 +87,223 @@ export default function ProfileForm({
     };
 
     try {
-      // Validate the form data using the Zod schema
-      ProfileFormSchema.parse(data);
-      setErrors({}); // Clear any previous errors
-
-      // If validation passes, proceed with the original onSubmit
+      ProfileFormSchema.parse(plainData);
+      setErrors({});
       onSubmit(formData);
-    } catch (error) {
-      if (error instanceof ZodError) {
+      setStatusMessage({ type: 'success', text: 'Profile saved successfully!' });
+    } catch (err) {
+      if (err instanceof ZodError) {
         const newErrors: ProfileFormValidationErrors = {};
-        for (const issue of error.issues) {
-          // Zod issues have a 'path' array, like ['bio']
-          const fieldName = issue.path[0] as keyof ProfileFormValidationErrors;
-          if (fieldName) {
-            newErrors[fieldName] = newErrors[fieldName]
-              ? [...newErrors[fieldName]!, issue.message]
-              : [issue.message];
+        for (const issue of err.issues) {
+          const field = issue.path[0] as keyof ProfileFormValidationErrors;
+          if (!newErrors[field]) {
+            newErrors[field] = [];
           }
+          newErrors[field]?.push(issue.message);
         }
         setErrors(newErrors);
-        console.error("Form validation errors:", newErrors);
+        setStatusMessage({ type: 'error', text: 'Please fix the errors above.' });
       } else {
-        console.error("An unexpected error occurred:", error);
+        console.error('Unexpected error:', err);
       }
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-6"
-    >
-      {/* Profile Image URL */}
-      <div>
-        <label htmlFor="profileImageUrl" className="block text-sm font-medium text-[#3E3E3E] mb-1">
-          Profile Image URL
-        </label>
-        <div className="relative">
-          <input
-            id="profileImageUrl"
-            name="profileImageUrl"
-            type="url" // Use type="url" for better browser validation
-            value={profileImageUrl}
-            onChange={(e) => setProfileImageUrl(e.target.value)}
-            className={`block w-full rounded-md border py-2 pl-10 shadow-sm focus:border-[#B55B3D] focus:ring-[#B55B3D] bg-white
-              ${errors.profileImageUrl ? 'border-red-500' : 'border-[#E6E1DC]'}`}
-            placeholder="e.g., https://example.com/your-image.jpg"
-          />
-          <PhotoIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#6C6C6C]" />
-        </div>
-        {errors.profileImageUrl && <p className="mt-1 text-sm text-red-500">{errors.profileImageUrl[0]}</p>}
-      </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Profile Image */}
+      <Field
+        id="profileImageUrl"
+        label="Profile Image URL"
+        icon={<PhotoIcon className="h-5 w-5 text-[#6C6C6C]" />}
+        value={formState.profileImageUrl}
+        error={errors.profileImageUrl}
+        placeholder="https://example.com/image.jpg"
+        onChange={handleChange('profileImageUrl')}
+        type="url"
+      />
 
       {/* Bio */}
-      <div>
-        <label htmlFor="bio" className="block text-sm font-medium text-[#3E3E3E] mb-1">
-          About You
-        </label>
-        <div className="relative">
-          <textarea
-            id="bio"
-            name="bio"
-            rows={4}
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            className={`block w-full rounded-md border py-2 pl-10 shadow-sm focus:border-[#B55B3D] focus:ring-[#B55B3D] bg-white
-              ${errors.bio ? 'border-red-500' : 'border-[#E6E1DC]'}`}
-            placeholder="Tell us about yourself..."
-          />
-          <UserCircleIcon className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-[#6C6C6C]" />
-        </div>
-        {errors.bio && <p className="mt-1 text-sm text-red-500">{errors.bio[0]}</p>}
-      </div>
+      <Field
+        id="bio"
+        label="About You"
+        icon={<UserCircleIcon className="h-5 w-5 text-[#6C6C6C]" />}
+        value={formState.bio}
+        error={errors.bio}
+        placeholder="Tell us about yourself..."
+        onChange={handleChange('bio')}
+        isTextArea
+      />
 
       {/* Address */}
-      <div>
-        <label htmlFor="address" className="block text-sm font-medium text-[#3E3E3E] mb-1">
-          Address
-        </label>
-        <div className="relative">
-          <input
-            id="address"
-            name="address"
-            type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className={`block w-full rounded-md border py-2 pl-10 shadow-sm focus:border-[#B55B3D] focus:ring-[#B55B3D] bg-white
-              ${errors.address ? 'border-red-500' : 'border-[#E6E1DC]'}`}
-            placeholder="123 Main St"
-          />
-          <HomeIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#6C6C6C]" />
-        </div>
-        {errors.address && <p className="mt-1 text-sm text-red-500">{errors.address[0]}</p>}
-      </div>
+      <Field
+        id="address"
+        label="Address"
+        icon={<HomeIcon className="h-5 w-5 text-[#6C6C6C]" />}
+        value={formState.address}
+        error={errors.address}
+        placeholder="123 Main St"
+        onChange={handleChange('address')}
+      />
 
       {/* City, State, Zip */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label htmlFor="city" className="block text-sm font-medium text-[#3E3E3E] mb-1">
-            City
-          </label>
-          <input
-            id="city"
-            name="city"
-            type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            className={`block w-full rounded-md border py-2 px-3 shadow-sm focus:border-[#B55B3D] focus:ring-[#B55B3D] bg-white
-              ${errors.city ? 'border-red-500' : 'border-[#E6E1DC]'}`}
-          />
-          {errors.city && <p className="mt-1 text-sm text-red-500">{errors.city[0]}</p>}
-        </div>
-        <div>
-          <label htmlFor="state" className="block text-sm font-medium text-[#3E3E3E] mb-1">
-            State/Province
-          </label>
-          <input
-            id="state"
-            name="state"
-            type="text"
-            value={state}
-            onChange={(e) => setState(e.target.value)}
-            className={`block w-full rounded-md border py-2 px-3 shadow-sm focus:border-[#B55B3D] focus:ring-[#B55B3D] bg-white
-              ${errors.state ? 'border-red-500' : 'border-[#E6E1DC]'}`}
-          />
-          {errors.state && <p className="mt-1 text-sm text-red-500">{errors.state[0]}</p>}
-        </div>
-        <div>
-          <label htmlFor="zipCode" className="block text-sm font-medium text-[#3E3E3E] mb-1">
-            ZIP/Postal Code
-          </label>
-          <input
-            id="zipCode"
-            name="zipCode"
-            type="text"
-            value={zipCode}
-            onChange={(e) => setZipCode(e.target.value)}
-            className={`block w-full rounded-md border py-2 px-3 shadow-sm focus:border-[#B55B3D] focus:ring-[#B55B3D] bg-white
-              ${errors.zipCode ? 'border-red-500' : 'border-[#E6E1DC]'}`}
-          />
-          {errors.zipCode && <p className="mt-1 text-sm text-red-500">{errors.zipCode[0]}</p>}
-        </div>
+        <SimpleField
+          id="city"
+          label="City"
+          value={formState.city}
+          error={errors.city}
+          onChange={handleChange('city')}
+        />
+        <SimpleField
+          id="state"
+          label="State/Province"
+          value={formState.state}
+          error={errors.state}
+          onChange={handleChange('state')}
+        />
+        <SimpleField
+          id="zipCode"
+          label="ZIP/Postal Code"
+          value={formState.zipCode}
+          error={errors.zipCode}
+          onChange={handleChange('zipCode')}
+        />
       </div>
 
       {/* Country */}
-      <div>
-        <label htmlFor="country" className="block text-sm font-medium text-[#3E3E3E] mb-1">
-          Country
-        </label>
-        <div className="relative">
-          <input
-            id="country"
-            name="country"
-            type="text"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            className={`block w-full rounded-md border py-2 pl-10 shadow-sm focus:border-[#B55B3D] focus:ring-[#B55B3D] bg-white
-              ${errors.country ? 'border-red-500' : 'border-[#E6E1DC]'}`}
-          />
-          <GlobeAltIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#6C6C6C]" />
-        </div>
-        {errors.country && <p className="mt-1 text-sm text-red-500">{errors.country[0]}</p>}
-      </div>
+      <Field
+        id="country"
+        label="Country"
+        icon={<GlobeAltIcon className="h-5 w-5 text-[#6C6C6C]" />}
+        value={formState.country}
+        error={errors.country}
+        placeholder="Canada"
+        onChange={handleChange('country')}
+      />
 
-      {/* Phone Number */}
-      <div>
-        <label htmlFor="phoneNumber" className="block text-sm font-medium text-[#3E3E3E] mb-1">
-          Phone Number
-        </label>
-        <div className="relative">
-          <input
-            id="phoneNumber"
-            name="phoneNumber"
-            type="tel"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            className={`block w-full rounded-md border py-2 pl-10 shadow-sm focus:border-[#B55B3D] focus:ring-[#B55B3D] bg-white
-              ${errors.phoneNumber ? 'border-red-500' : 'border-[#E6E1DC]'}`}
-          />
-          <PhoneIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#6C6C6C]" />
-        </div>
-        {errors.phoneNumber && <p className="mt-1 text-sm text-red-500">{errors.phoneNumber[0]}</p>}
-      </div>
+      {/* Phone */}
+      <Field
+        id="phoneNumber"
+        label="Phone Number"
+        icon={<PhoneIcon className="h-5 w-5 text-[#6C6C6C]" />}
+        value={formState.phoneNumber}
+        error={errors.phoneNumber}
+        placeholder="+1 (555) 123-4567"
+        onChange={handleChange('phoneNumber')}
+        type="tel"
+      />
 
-      <div className="flex justify-end">
-        <Button type="submit" className="bg-[#B55B3D] hover:bg-[#9E4F37]">
-          {isEditing ? 'Update Profile' : 'Create Profile'}
-        </Button>
-      </div>
+      {/* Status message */}
+      {statusMessage && (
+        <div className={`p-4 text-sm rounded-md ${
+          statusMessage.type === 'success'
+            ? 'bg-green-100 text-green-800 border border-green-300'
+            : 'bg-red-100 text-red-800 border border-red-300'
+        }`}>
+          {statusMessage.text}
+        </div>
+      )}
+
+      <button
+        type="submit"
+        className="bg-[#B55B3D] text-white px-6 py-2 rounded-md hover:bg-[#a14c31] transition"
+      >
+        Save
+      </button>
     </form>
+  );
+}
+
+// --- REUSABLE COMPONENTS ---
+function Field({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  icon,
+  error,
+  type = 'text',
+  isTextArea = false,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  placeholder: string;
+  icon: React.ReactNode;
+  error?: string[];
+  type?: string;
+  isTextArea?: boolean;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium text-[#3E3E3E] mb-1">
+        {label}
+      </label>
+      <div className="relative">
+        {isTextArea ? (
+          <textarea
+            id={id}
+            name={id}
+            value={value}
+            onChange={onChange}
+            rows={4}
+            className={`block w-full rounded-md border py-2 pl-10 shadow-sm bg-white resize-y
+              ${error ? 'border-red-500' : 'border-[#E6E1DC]'}
+              focus:border-[#B55B3D] focus:ring-[#B55B3D]`}
+            placeholder={placeholder}
+          />
+        ) : (
+          <input
+            id={id}
+            name={id}
+            type={type}
+            value={value}
+            onChange={onChange}
+            className={`block w-full rounded-md border py-2 pl-10 shadow-sm bg-white
+              ${error ? 'border-red-500' : 'border-[#E6E1DC]'}
+              focus:border-[#B55B3D] focus:ring-[#B55B3D]`}
+            placeholder={placeholder}
+          />
+        )}
+        <div className="absolute left-3 top-1/2 -translate-y-1/2">{icon}</div>
+      </div>
+      {error && <p className="text-sm text-red-500 mt-1">{error[0]}</p>}
+    </div>
+  );
+}
+
+function SimpleField({
+  id,
+  label,
+  value,
+  onChange,
+  error,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  error?: string[];
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium text-[#3E3E3E] mb-1">
+        {label}
+      </label>
+      <input
+        id={id}
+        name={id}
+        type="text"
+        value={value}
+        onChange={onChange}
+        className={`block w-full rounded-md border py-2 px-3 shadow-sm bg-white
+          ${error ? 'border-red-500' : 'border-[#E6E1DC]'}
+          focus:border-[#B55B3D] focus:ring-[#B55B3D]`}
+      />
+      {error && <p className="text-sm text-red-500 mt-1">{error[0]}</p>}
+    </div>
   );
 }

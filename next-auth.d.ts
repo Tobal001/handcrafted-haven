@@ -20,6 +20,10 @@ declare module "next-auth/jwt" {
     // Allow name and email to be string | null | undefined as per SessionUser
     name?: string | null;
     email?: string | null;
+    createdAt: string;
+    lastLoginAt: string;
+    hasProfile: boolean;
+    firstLogin: boolean;
   }
 }
 
@@ -31,6 +35,8 @@ declare module "next-auth" {
       role: 'buyer' | 'artisan' | 'admin';
       name?: string | null; // Match SessionUser type
       email?: string | null; // Match SessionUser type
+      hasProfile: boolean;
+      firstLogin: boolean;
     } & DefaultSession['user'];
   }
 
@@ -38,5 +44,7 @@ declare module "next-auth" {
     role: 'buyer' | 'artisan' | 'admin';
     name?: string | null; // Match User type
     email?: string | null; // Match User type
+    createdAt: string;
+    lastLoginAt: string;
   }
 }

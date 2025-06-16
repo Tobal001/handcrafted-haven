@@ -48,3 +48,14 @@ export type LoginFormState = {
   redirectUrl?: string;
 };
 
+export const ArtisanProfileFormSchema = z.object({
+  shopName: z.string().min(1),
+  shopDescription: z.string().nullable().optional(),
+  bio: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  website: z.string().url().nullable().optional(),
+  policies: z.string().nullable().optional(),
+  shippingInfo: z.string().nullable().optional(),
+  returnPolicy: z.string().nullable().optional(),
+});
+

@@ -1,25 +1,20 @@
-
-// src/app/(main)/artisans/products/page.tsx
-
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { useState, useEffect, useCallback } from 'react'; // Import useCallback
-import { fetchProductsBySeller, deleteProduct } from '@/lib/data/products'; // Import deleteProduct
+import { useState, useEffect, useCallback } from 'react';
+import { fetchProductsBySeller, deleteProduct } from '@/lib/data/products';
 import ProductCard from '@/components/products/ProductCard';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline'; // Import TrashIcon
+import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
-export default function ArtisanProductsPage() {
+export default function ArtisanProductsManager() {
   const { data: session } = useSession();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Memoize loadProducts to prevent unnecessary re-renders/fetches
   const loadProducts = useCallback(async () => {
     if (!session?.user?.id) return;
-    
     setLoading(true);
     try {
       const data = await fetchProductsBySeller(session.user.id);
@@ -29,22 +24,20 @@ export default function ArtisanProductsPage() {
     } finally {
       setLoading(false);
     }
-  }, [session?.user?.id]); // Depend on session.user.id
+  }, [session?.user?.id]);
 
   useEffect(() => {
     loadProducts();
-  }, [loadProducts]); // Depend on the memoized loadProducts function
+  }, [loadProducts]);
 
   const handleDeleteProduct = async (productId: string) => {
-    // Add a confirmation dialog for better UX
-    if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+    if (confirm('Are you sure you want to delete this product?')) {
       try {
         await deleteProduct(productId);
-        // After successful deletion, refresh the product list
-        loadProducts(); 
+        loadProducts();
       } catch (error) {
         console.error('Failed to delete product:', error);
-        alert('Failed to delete product. Please try again.'); // Consider a custom modal in production for better UX
+        alert('Failed to delete product. Please try again.');
       }
     }
   };
@@ -87,18 +80,18 @@ export default function ArtisanProductsPage() {
           {products.map((product) => (
             <div key={product.productId} className="relative">
               <ProductCard product={product} />
-              <div className="absolute top-2 right-2 flex space-x-2"> {/* Container for buttons */}
+              <div className="absolute top-2 right-2 flex space-x-2">
                 <Link 
                   href={`/products/${product.productId}/edit`}
                   className="bg-white p-2 rounded-full shadow-md hover:bg-[#F9F4EF] transition-colors"
-                  title="Edit Product" // Tooltip for accessibility
+                  title="Edit Product"
                 >
                   <PencilIcon className="h-4 w-4 text-[#B55B3D]" />
                 </Link>
                 <button
                   onClick={() => handleDeleteProduct(product.productId)}
                   className="bg-white p-2 rounded-full shadow-md hover:bg-red-100 transition-colors"
-                  title="Delete Product" // Tooltip for accessibility
+                  title="Delete Product"
                 >
                   <TrashIcon className="h-4 w-4 text-red-500" />
                 </button>

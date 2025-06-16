@@ -7,7 +7,7 @@
 import { fetchProfileByUserId } from './profile'; // Assuming this import is correct and needed
 import { unstable_noStore as noStore } from 'next/cache';
 import prisma from '@/lib/prisma';
-import { ArtisanProfile, ArtisanProfileFormData } from '@/lib/definitions';
+import { ArtisanProfile, ArtisanProfileFormData, ArtisanProfileFormSchema } from '@/lib/definitions';
 // Import base model types directly from @prisma/client
 import {
   ArtisanProfile as PrismaArtisanProfileModel,
@@ -142,29 +142,32 @@ function transformArtisanProfileForDisplay(
 export async function createArtisanProfile(userId: string, formData: FormData) {
   noStore();
   try {
-    const profileData: ArtisanProfileFormData = {
-      shopName: getStringValue(formData, 'shopName') || '', // Required field
-      shopDescription: getStringValue(formData, 'shopDescription'),
-      bio: getStringValue(formData, 'bio'),
-      location: getStringValue(formData, 'location'),
-      website: getStringValue(formData, 'website'),
-      policies: getStringValue(formData, 'policies'),
-      shippingInfo: getStringValue(formData, 'shippingInfo'),
-      returnPolicy: getStringValue(formData, 'returnPolicy'),
-    };
+    // Convert FormData to a plain object
+    const rawData = Object.fromEntries(formData.entries());
 
-    // Use Prisma to create the artisan profile
+    // Validate with Zod
+    const result = ArtisanProfileFormSchema.safeParse(rawData);
+
+    if (!result.success) {
+      return {
+        ok: false,
+        errors: result.error.flatten().fieldErrors,
+    };
+}
+
+    const data = result.data;
+
     await prisma.artisanProfile.create({
       data: {
-        userId: userId,
-        shopName: profileData.shopName,
-        shopDescription: profileData.shopDescription,
-        bio: profileData.bio,
-        location: profileData.location,
-        website: profileData.website,
-        policies: profileData.policies,
-        shippingInfo: profileData.shippingInfo,
-        returnPolicy: profileData.returnPolicy,
+        userId,
+        shopName: data.shopName,
+        shopDescription: data.shopDescription,
+        bio: data.bio,
+        location: data.location,
+        website: data.website,
+        policies: data.policies,
+        shippingInfo: data.shippingInfo,
+        returnPolicy: data.returnPolicy,
       },
     });
   } catch (error) {
@@ -172,6 +175,7 @@ export async function createArtisanProfile(userId: string, formData: FormData) {
     throw new Error('Failed to create artisan profile.');
   }
 }
+
 
 export async function fetchArtisanProfileByUserId(userId: string): Promise<ArtisanProfile | undefined> {
   noStore();
