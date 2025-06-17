@@ -4,7 +4,7 @@
 'use client';
 
 import { UserCircleIcon, HomeIcon, MapPinIcon, PhoneIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
-import { Button } from '../ui/button';
+import { Button } from '../ui/Button';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Profile } from '@/lib/definitions'; // Make sure this import is correct and Profile is defined

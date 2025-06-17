@@ -1,9 +1,8 @@
-
 // src/app/(main)/products/page.tsx
 
 import { Suspense } from 'react'; // Import Suspense from React
 import { fetchAllProducts } from '@/lib/data/products'; // Server Action
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import ProductCard from '@/components/products/ProductCard';

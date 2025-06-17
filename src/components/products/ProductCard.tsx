@@ -24,7 +24,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden border border-[#E6E1DC] hover:shadow-lg transition-shadow">
-      <Link href={`/products/${product.productId}`} className="block">
+      <Link href={`/dashboard/products/${product.productId}`} className="block">
         {/* Product Image */}
         <div className="aspect-square bg-[#F9F4EF] relative">
           {primaryImage ? (

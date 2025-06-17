@@ -17,7 +17,7 @@ import { Product, ArtisanProfileForDisplay } from '@/lib/definitions';
 
 // Components
 import ArtisanProductCard from '@/components/products/ArtisanProductCard';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 // Icons
 import {

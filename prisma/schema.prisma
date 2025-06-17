@@ -28,6 +28,7 @@ model User {
   resetTokenExpires   DateTime?            @map("reset_token_expires") @db.Timestamptz()
   createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt           DateTime             @updatedAt @map("updated_at") @db.Timestamptz()
+  lastLoginAt         DateTime?            @map("last_login_at") @db.Timestamptz()
 
   artisanProfile      ArtisanProfile?
   passwordHistory     PasswordHistory[]

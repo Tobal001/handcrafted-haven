@@ -9,7 +9,7 @@ import { fetchProductById, updateProduct } from '@/lib/data/products';
 import { fetchCategories } from '@/lib/data/categories';
 import ProductForm from '@/components/products/ProductForm';
 import { useRouter, useParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 export default function EditProductPage() {
   const { data: session } = useSession();
@@ -83,7 +83,6 @@ export default function EditProductPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-serif font-bold text-[#3E3E3E]">Edit Product</h1>
       </div>
-      <div className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E6E1DC] p-6">
         <ProductForm 
           sellerId={session?.user?.id || ''}
           onSubmit={handleSubmit}
@@ -94,6 +93,5 @@ export default function EditProductPage() {
           isEditing={true}
         />
       </div>
-    </div>
   );
 }

@@ -65,7 +65,7 @@ export default function ArtisanProductsPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-serif font-bold text-[#3E3E3E]">My Products</h1>
-        <Link href="dashboard/products/create">
+        <Link href="/products/create">
           <Button className="bg-[#B55B3D] hover:bg-[#9E4F37] flex items-center gap-1">
             <PlusIcon className="h-4 w-4" />
             Add Product
@@ -76,7 +76,7 @@ export default function ArtisanProductsPage() {
       {products.length === 0 ? (
         <div className="bg-white rounded-xl shadow-md overflow-hidden border border-[#E6E1DC] p-6 text-center">
           <p className="text-[#6C6C6C] mb-4">You haven't created any products yet.</p>
-          <Link href="dashboard/products/create">
+          <Link href="/products/create">
             <Button className="bg-[#B55B3D] hover:bg-[#9E4F37]">
               Create Your First Product
             </Button>

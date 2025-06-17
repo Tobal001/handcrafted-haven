@@ -48,3 +48,10 @@ export type LoginFormState = {
   redirectUrl?: string;
 };
 
+export async function getUserProfileMeta(email: string) {
+
+  return {
+    hasProfile: true, // or false
+    firstLogin: false, // or true (maybe a field like `lastLoginAt`)
+  };
+};

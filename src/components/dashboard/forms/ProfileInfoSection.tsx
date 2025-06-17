@@ -4,7 +4,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/Button';
 import { UserCircleIcon, HomeIcon, MapPinIcon, PhoneIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import { Profile, ProfileFormSchema, ProfileFormValidationErrors } from '@/lib/definitions'; // Import types and schema
 import { ZodError } from 'zod'; // Import ZodError
@@ -244,8 +244,8 @@ export default function ProfileForm({
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" className="bg-[#B55B3D] hover:bg-[#9E4F37]">
-          {isEditing ? 'Update Profile' : 'Create Profile'}
+        <Button type="submit" className="bg-[#B55B3D] text-white px-6 py-2 rounded-md hover:bg-[#a14c31] transition">
+          save
         </Button>
       </div>
     </form>
