@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { Product, Review } from '@/lib/definitions'; // Ensure Review is imported here
 import { StarIcon } from '@heroicons/react/24/solid';
 import { useState, useEffect } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '../ui/Button';
 import { fetchProductReviews } from '@/lib/data/reviews';
 import ReviewForm from '../reviews/ReviewForm';
 import { useSession } from 'next-auth/react'; // Import useSession
@@ -34,9 +34,10 @@ import {
 // Assuming ProductDetailProps is defined similarly to:
 interface ProductDetailProps {
   product: Product;
+  mode?: 'shop' | 'dashboard';
 }
 
-export default function ProductDetail({ product }: ProductDetailProps) {
+export default function ProductDetail({ product, mode = 'shop' }: ProductDetailProps) {
   const { data: session, status } = useSession(); // Get session data
   const currentUserId = session?.user?.id; // Assuming user.id is available in session
   const currentUserRole = session?.user?.role; // Assuming user.role is available (e.g., 'buyer', 'artisan', 'admin')
@@ -92,9 +93,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   // --- End RBAC Logic ---
 
   return (
-    <div className="bg-[#FDF9F6] py-10 px-4 sm:px-6 lg:px-8"> {/* Added main background */}
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E6E1DC] p-8 md:p-12"> {/* Enhanced main card styling */}
+    
+    
+      
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16"> {/* Increased gap */}
             {/* Product Images */}
             <div className="flex flex-col items-center">
@@ -251,8 +252,18 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 </div>
               )}
 
-              {/* Add to Cart */}
-              <div className="flex flex-col sm:flex-row gap-4"> {/* Responsive buttons */}
+              {/* Action Button Section */}
+            {mode === 'dashboard' ? (
+              <div className="mt-6">
+                <Link
+                  href={`/dashboard/products/${product.productId}/edit`}
+                  className="inline-block bg-[#B55B3D] hover:bg-[#9E4F37] text-white px-6 py-3 rounded-xl text-lg font-semibold shadow-md transition-transform duration-300 transform hover:scale-105"
+                >
+                  Edit Item
+                </Link>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex items-center border border-[#E6E1DC] rounded-xl overflow-hidden shadow-sm">
                   <button className="px-5 py-3 text-[#6C6C6C] hover:bg-[#F3ECE5] transition-colors duration-200 text-lg font-semibold">-</button>
                   <span className="px-6 py-3 text-lg font-bold text-[#3E3E3E]">1</span>
@@ -262,8 +273,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   <ShoppingCartIcon className="h-5 w-5" /> Add to Cart
                 </Button>
               </div>
-            </div>
-          </div>
+            )}
 
           {/* Reviews Section */}
           <div className="border-t border-[#E6E1DC] pt-10 mt-10"> {/* More padding and margin for separation */}
@@ -355,6 +365,5 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           </div>
         </div>
       </div>
-    </div>
   );
 }

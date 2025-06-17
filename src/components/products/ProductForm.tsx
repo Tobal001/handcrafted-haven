@@ -4,7 +4,7 @@
 'use client';
 
 import { useFormStatus } from 'react-dom';
-import { Button } from '../ui/button';
+import { Button } from '../ui/Button';
 import { PhotoIcon } from '@heroicons/react/24/outline';
 
 interface ProductFormProps {

@@ -10,6 +10,7 @@
     "postinstall": "npm list @prisma/client || true"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.9.0",
     "@radix-ui/react-icons": "^1.3.2",

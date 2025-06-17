@@ -4,7 +4,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '../ui/Button';
 import {
   UserCircleIcon,
   HomeIcon,

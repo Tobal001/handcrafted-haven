@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 // Import the updated fetch function and the shared type
 import { fetchArtisanProfilesForList, ArtisanProfileForDisplay } from '@/lib/data/artisans';
 

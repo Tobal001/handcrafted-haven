@@ -10,7 +10,7 @@ import { createProduct } from '@/lib/data/products';
 import { fetchCategories } from '@/lib/data/categories';
 import ProductForm from '@/components/products/ProductForm';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button'; // Assuming you have this UI component
+import { Button } from '@/components/ui/Button'; // Assuming you have this UI component
 
 export default function CreateProductPage() {
   const { data: session } = useSession();

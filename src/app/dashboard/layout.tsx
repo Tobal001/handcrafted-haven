@@ -1,16 +1,20 @@
+// app/dashboard/layout.tsx
+import { auth } from '@/auth';
+import DashboardShell from '@/components/layout/DashboardShell';
+import type { ReactNode } from 'react';
+import { Session } from 'next-auth';
 
-// Update src/app/dashboard/layout.tsx
+export default async function DashboardLayout({ children }: { children: ReactNode; }) {
+  const session = await auth();
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+  if (!session?.user) {
+    // Optional: redirect to login if no session
+    return <div className="text-red-500">Unauthorized</div>;
+  }
+
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="flex-grow p-6">
-        {children}
-      </div>
-    </div>
+    <DashboardShell session={session}>
+      {children}
+    </DashboardShell>
   );
 }

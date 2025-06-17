@@ -45,3 +45,31 @@ export async function getUserByEmail(email: string): Promise<User | null> {
     throw new Error('Failed to retrieve user data.');
   }
 }
+
+export async function getUserProfileMeta(email: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        profile: true, // or artisanProfile: true depending on your model
+      },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const hasProfile = !!user.profile; // true if profile exists
+    const firstLogin = !user.lastLoginAt; // if you've added this field
+
+    return {
+      hasProfile,
+      firstLogin,
+      role: user.role,
+      name: user.name,
+    };
+  } catch (error) {
+    console.error('[getUserProfileMeta] Failed:', error);
+    return { hasProfile: false, firstLogin: false, role: 'buyer', name: '' };
+  }
+}

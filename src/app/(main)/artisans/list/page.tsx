@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 // Import the NEW specific function for the list page
 import { fetchArtisanProfilesForList } from '@/lib/data/artisans';
 // No need to import the general ArtisanProfile if you define a specific type here
